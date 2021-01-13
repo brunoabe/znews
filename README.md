@@ -1,4 +1,4 @@
-# znews
+# ZNews
 
 A service capable of reading rss news feeds and storing the articles, making them available throughout a RESTful API.
 
@@ -47,7 +47,7 @@ All tests should be run using the Golang test framework. To do that, one needs t
 go test -v
 ```
 
-_*Note*: Running the above command under `znews/e2e` will run the end to end test scenarios. To do that, a new service will be spin-up locally and automatic calls will be made to verify the behaviour.
+_Note: Running the above command under `znews/e2e` will run the end to end test scenarios. To do that, a new service will be spin-up locally and automatic calls will be made to verify the behaviour.
 
 # Documentation
 
@@ -117,35 +117,35 @@ curl -v -X GET \
   "http://localhost:8052/articles"
 ```
 
-_*Note*: If the query parameter for pageSize is not informed, the API will return all available data._
+_Note: If the query parameter for pageSize is not informed, the API will return all available data._
 
 ```
 curl -v -X GET \
   "http://localhost:8052/articles?pageSize=5"
 ```
 
-_*Note*: If the query parameter for pageSize is informed and no cursor is infored, the API will return the first page of articles._
+_Note: If the query parameter for pageSize is informed and no cursor is infored, the API will return the first page of articles._
 
 ```
 curl -v -X GET \
   "http://localhost:8052/articles?pageSize=5&c=c77397a6-163a-56df-9e22-8e29ea7a62b5"
 ```
 
-_*Note*: If the query parameter for pageSize is informed and a cursor is infored, the API will return the next page of articles starting from the next article from the informed cursor._
+_Note: If the query parameter for pageSize is informed and a cursor is infored, the API will return the next page of articles starting from the next article from the informed cursor._
 
 ```
 curl -v -X GET \
   "http://localhost:8052/articles?pageSize=5&feed=0792cd43-d8f3-5a38-9739-c797bd08c6fa"
 ```
 
-_*Note*: If the query parameter for feed is informed with a feed ID, the API will filter only articles for such feed to be returned._
+_Note: If the query parameter for feed is informed with a feed ID, the API will filter only articles for such feed to be returned._
 
 ```
 curl -v -X GET \
   "http://localhost:8052/articles?pageSize=5&cat=Technology&cat=UK"
 ```
 
-_*Note*: If the query parameter for categories is informed, the API will return filtered data based on the category field of the rss feed. If the field doesn't support that and any category is informed, the API will return an empty response._
+_Note: If the query parameter for categories is informed, the API will return filtered data based on the category field of the rss feed. If the field doesn't support that and any category is informed, the API will return an empty response._
 
 ### GetArticle
 
