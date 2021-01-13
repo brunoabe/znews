@@ -35,6 +35,7 @@ type ResponseError struct {
 	Error string
 }
 
+// TestSuite represents a test suite capable of running all e2e test cases for the service.
 type TestSuite struct {
 	httpServerExitDone *sync.WaitGroup
 	suite.Suite
@@ -44,11 +45,16 @@ type TestSuite struct {
 	service      *service.Service
 }
 
+// SetupTest runs whenever a new test starts. In this case, it resets the stores to allow the test
+// initial state to be the same for all test cases.
 func (s *TestSuite) SetupTest() {
 	s.feedStore.Reset()
 	s.articleStore.Reset()
 }
 
+// SetupSuite runs whenever the whole test suite starts. In this case it loads new components and
+// inject them into a local web service that exposes the API functionality so that the tests can
+// call the API endpoints through HTTP requests.
 func (s *TestSuite) SetupSuite() {
 	s.feedStore = store.NewFeedStore()
 	s.articleStore = store.NewArticleStore()
@@ -149,12 +155,12 @@ func (s *TestSuite) TestCanLazyLoadArticles() {
 	firstID := articles[0].ID
 	secondID := articles[1].ID
 
-	// Getting the first two articles to check pagination.
+	// Getting the first article paginated.
 	firstPageArticles := s.listArticles("", 1, "")
 	a.Len(firstPageArticles, 1)
 	a.Equal(firstPageArticles[0].ID, firstID)
 
-	// Getting the first two articles to check pagination.
+	// Getting the second article and checks pagination.
 	secondPageArticles := s.listArticles(firstID, 1, "")
 	a.Len(secondPageArticles, 1)
 	a.Equal(secondPageArticles[0].ID, secondID)
@@ -176,10 +182,11 @@ func (s *TestSuite) TestCanFilterArticlesByCategories() {
 	// Load the feed.
 	s.loadFeed(feed.ID)
 
-	// Getting the first two articles to check pagination.
-	articles := s.listArticles("", 100, "")
+	// Getting all articles to check how many articles are found per category.
+	articles := s.listArticles("", 0, "")
 	categoriesCountMap := map[string]int{}
 
+	// Stores the count of articles per category to assert filtering.
 	for _, a := range articles {
 		if len(a.Categories) > 0 {
 			for _, c := range a.Categories {
@@ -192,11 +199,12 @@ func (s *TestSuite) TestCanFilterArticlesByCategories() {
 		}
 	}
 
+	// If the provided feed returns only articles with no categories, this test is not valid.
 	r.NotEqual(0, len(categoriesCountMap), "invalid test, no articles have categories")
 
 	for c, count := range categoriesCountMap {
 		// Checking all found categories for the length of articles.
-		firstPageArticles := s.listArticles("", 100, "", c)
+		firstPageArticles := s.listArticles("", 0, "", c)
 		r.Len(firstPageArticles, count)
 	}
 }
@@ -215,20 +223,22 @@ func (s *TestSuite) TestCanFilterArticlesByFeed() {
 	a.Equal(testRssFeed, feed.Address)
 	r.Equal(testRssFeedID, feed.ID)
 
+	// Create a secondary feed to have two stored feeds and articles in the store.
 	feed2 := s.createFeed("p2", "c2", testSecondaryRssFeed)
 	a.Equal("c2", feed2.Category)
 	a.Equal("p2", feed2.Provider)
 	a.Equal(testSecondaryRssFeed, feed2.Address)
 	r.Equal(testSecondaryRssFeedID, feed2.ID)
 
-	// Load the feed.
+	// Load the feeds.
 	s.loadFeed(feed.ID)
 	s.loadFeed(feed2.ID)
 
-	// Getting the first two articles to check pagination.
-	articles := s.listArticles("", 100, "")
+	// Getting all articles to check how many articles are found per category.
+	articles := s.listArticles("", 0, "")
 	feedCountMap := map[string]int{}
 
+	// Stores the count of articles per feed to assert filtering.
 	for _, a := range articles {
 		if _, ok := feedCountMap[a.FeedID]; !ok {
 			feedCountMap[a.FeedID] = 1
@@ -240,8 +250,8 @@ func (s *TestSuite) TestCanFilterArticlesByFeed() {
 	r.Equal(2, len(feedCountMap), "unexpected number of feeds")
 
 	for c, count := range feedCountMap {
-		// Checking all found categories for the length of articles.
-		firstPageArticles := s.listArticles("", 100, c)
+		// Checking all found feeds for the length of articles.
+		firstPageArticles := s.listArticles("", 0, c)
 		r.Len(firstPageArticles, count)
 	}
 }
@@ -274,7 +284,6 @@ func (s *TestSuite) TestCanGetSingleArticleByID() {
 	article := s.getArticle(articleID)
 	r.NotNil(article)
 	a.Equal(articleID, article.ID)
-
 }
 
 // TestArticlesAreRetunedOrderedByPublishDate tests that when the API is called to list articles,
@@ -295,7 +304,7 @@ func (s *TestSuite) TestArticlesAreRetunedOrderedByPublishDate() {
 	s.loadFeed(feed.ID)
 
 	// Check if results were loaded.
-	articles := s.listArticles("", 100, "")
+	articles := s.listArticles("", 0, "")
 	a.True(len(articles) > 1, "not enough articles to check the condition")
 
 	// Checking order.
@@ -387,6 +396,7 @@ func getAPIUrl(action string, args ...string) string {
 	return r
 }
 
+// TestTestSuite runs the whole end to end test suite.
 func TestTestSuit(t *testing.T) {
 	suite.Run(t, new(TestSuite))
 }

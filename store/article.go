@@ -82,7 +82,8 @@ func (as *ArticleStore) Create(article *types.Article) (*types.Article, error) {
 // provided cursor. Since the store will be ordered by publish date, if a newer article is added in
 // between calls, it might not be returned unless a new call to the endpoint is made with an earlier
 // cursor. If no categories are provided, no filter will be applied. If categories are provided, the
-// filtering will bypass any news for any category provided.
+// filtering will bypass any news for any category provided. If pageSize is set to 0, the service
+// returns all records.
 func (as *ArticleStore) List(cursor string, pageSize int, feed string, categories ...string) ([]*types.Article, error) {
 	// Create a hashmap for filtering.
 	cat := make(map[string]struct{}, len(categories))
