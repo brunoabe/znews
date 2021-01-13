@@ -47,7 +47,7 @@ All tests should be run using the Golang test framework. To do that, one needs t
 go test -v
 ```
 
-_Note: Running the above command under `znews/e2e` will run the end to end test scenarios. To do that, a new service will be spin-up locally and automatic calls will be made to verify the behaviour.
+_Note: Running the above command under `znews/e2e` will run the end to end test scenarios. To do that, a new service will be spin-up locally and automatic calls will be made to verify the behaviour._
 
 # Documentation
 
